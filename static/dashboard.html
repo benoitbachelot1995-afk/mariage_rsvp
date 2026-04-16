@@ -15,7 +15,12 @@
           <h1>Suivi des confirmations</h1>
           <p>Cette page centralise les réponses collectées dans la base de données locale.</p>
         </div>
-        <a class="button button-secondary" href="/">Retour au formulaire</a>
+        <div class="dashboard-actions">
+          <a class="button button-secondary" href="/">Retour au formulaire</a>
+          <form method="post" action="/admin/logout">
+            <button class="button button-ghost" type="submit">Se déconnecter</button>
+          </form>
+        </div>
       </section>
 
       <section class="stats-grid">

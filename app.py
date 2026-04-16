@@ -1,18 +1,23 @@
 from __future__ import annotations
 
+import hmac
 import json
+import os
+import secrets
 import sqlite3
 from datetime import datetime, timezone
+from http import cookies
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "rsvp.sqlite3"
+ADMIN_PASSWORD_PATH = DATA_DIR / "admin_password.txt"
 
 EVENT_CONFIG = {
     "couple_names": "Hortense & Benoit",
@@ -31,6 +36,8 @@ STATIC_CONTENT_TYPES = {
     ".json": "application/json; charset=utf-8",
     ".svg": "image/svg+xml",
 }
+ADMIN_SESSIONS: set[str] = set()
+SESSION_COOKIE_NAME = "rsvp_admin_session"
 
 
 def get_connection() -> sqlite3.Connection:
@@ -59,6 +66,28 @@ def init_db() -> None:
             )
             """
         )
+
+
+def get_admin_password() -> str:
+    env_password = os.environ.get("RSVP_ADMIN_PASSWORD", "").strip()
+    if env_password:
+        return env_password
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    if ADMIN_PASSWORD_PATH.exists():
+        stored_password = ADMIN_PASSWORD_PATH.read_text(encoding="utf-8").strip()
+        if stored_password:
+            return stored_password
+
+    generated_password = secrets.token_urlsafe(12)
+    ADMIN_PASSWORD_PATH.write_text(generated_password, encoding="utf-8")
+    try:
+        os.chmod(ADMIN_PASSWORD_PATH, 0o600)
+    except OSError:
+        pass
+
+    print(f"Mot de passe admin créé dans {ADMIN_PASSWORD_PATH}")
+    return generated_password
 
 
 def normalize_text(value: object, max_length: int = 500) -> str:
@@ -193,7 +222,16 @@ class RSVPRequestHandler(BaseHTTPRequestHandler):
         if parsed.path == "/":
             self.serve_static_file("index.html")
             return
+        if parsed.path == "/merci":
+            self.serve_static_file("thank-you.html")
+            return
+        if parsed.path == "/admin/login":
+            self.serve_static_file("login.html")
+            return
         if parsed.path == "/dashboard":
+            if not self.is_admin_authenticated():
+                self.redirect("/admin/login")
+                return
             self.serve_static_file("dashboard.html")
             return
         if parsed.path.startswith("/static/"):
@@ -204,6 +242,9 @@ class RSVPRequestHandler(BaseHTTPRequestHandler):
             self.send_json(EVENT_CONFIG)
             return
         if parsed.path == "/api/rsvps":
+            if not self.is_admin_authenticated():
+                self.send_json({"error": "Accès réservé à l'administration."}, HTTPStatus.UNAUTHORIZED)
+                return
             self.send_json(fetch_dashboard_data())
             return
 
@@ -212,10 +253,21 @@ class RSVPRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
 
-        if parsed.path != "/api/rsvp":
-            self.send_error(HTTPStatus.NOT_FOUND, "Endpoint introuvable.")
+        if parsed.path == "/api/rsvp":
+            self.handle_public_rsvp()
             return
 
+        if parsed.path == "/admin/login":
+            self.handle_admin_login()
+            return
+
+        if parsed.path == "/admin/logout":
+            self.handle_admin_logout()
+            return
+
+        self.send_error(HTTPStatus.NOT_FOUND, "Endpoint introuvable.")
+
+    def handle_public_rsvp(self) -> None:
         content_length = int(self.headers.get("Content-Length", "0"))
         raw_body = self.rfile.read(content_length)
 
@@ -238,12 +290,49 @@ class RSVPRequestHandler(BaseHTTPRequestHandler):
 
         self.send_json({"ok": True, "message": "Votre RSVP a bien été enregistré."}, HTTPStatus.CREATED)
 
+    def handle_admin_login(self) -> None:
+        content_length = int(self.headers.get("Content-Length", "0"))
+        raw_body = self.rfile.read(content_length).decode("utf-8")
+        form = parse_qs(raw_body)
+        submitted_password = form.get("password", [""])[0]
+
+        if not hmac.compare_digest(submitted_password, get_admin_password()):
+            self.redirect("/admin/login?error=1")
+            return
+
+        session_id = secrets.token_urlsafe(32)
+        ADMIN_SESSIONS.add(session_id)
+
+        self.send_response(HTTPStatus.SEE_OTHER)
+        self.send_header("Location", "/dashboard")
+        self.send_header(
+            "Set-Cookie",
+            f"{SESSION_COOKIE_NAME}={session_id}; HttpOnly; Path=/; SameSite=Lax",
+        )
+        self.end_headers()
+
+    def handle_admin_logout(self) -> None:
+        session_id = self.get_admin_session_id()
+        if session_id:
+            ADMIN_SESSIONS.discard(session_id)
+
+        self.send_response(HTTPStatus.SEE_OTHER)
+        self.send_header("Location", "/")
+        self.send_header(
+            "Set-Cookie",
+            f"{SESSION_COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax",
+        )
+        self.end_headers()
+
     def serve_static_file(self, relative_path: str) -> None:
         safe_relative_path = Path(relative_path)
         file_path = (STATIC_DIR / safe_relative_path).resolve()
 
         if STATIC_DIR not in file_path.parents and file_path != STATIC_DIR:
             self.send_error(HTTPStatus.FORBIDDEN, "Accès refusé.")
+            return
+        if safe_relative_path.name == "dashboard.html" and not self.is_admin_authenticated():
+            self.redirect("/admin/login")
             return
         if not file_path.exists() or not file_path.is_file():
             self.send_error(HTTPStatus.NOT_FOUND, "Fichier introuvable.")
@@ -263,12 +352,34 @@ class RSVPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def redirect(self, location: str) -> None:
+        self.send_response(HTTPStatus.SEE_OTHER)
+        self.send_header("Location", location)
+        self.end_headers()
+
+    def get_admin_session_id(self) -> str | None:
+        cookie_header = self.headers.get("Cookie")
+        if not cookie_header:
+            return None
+
+        parsed_cookie = cookies.SimpleCookie()
+        parsed_cookie.load(cookie_header)
+        morsel = parsed_cookie.get(SESSION_COOKIE_NAME)
+        if morsel is None:
+            return None
+        return morsel.value
+
+    def is_admin_authenticated(self) -> bool:
+        session_id = self.get_admin_session_id()
+        return bool(session_id and session_id in ADMIN_SESSIONS)
+
     def log_message(self, format: str, *args: object) -> None:
         return
 
 
 def run() -> None:
     init_db()
+    get_admin_password()
     server = ThreadingHTTPServer(("127.0.0.1", 8000), RSVPRequestHandler)
     print("RSVP Mariage disponible sur http://127.0.0.1:8000")
     server.serve_forever()
