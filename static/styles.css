@@ -147,7 +147,8 @@ p {
 
 .hero-grid,
 .feature-grid,
-.stats-grid {
+.stats-grid,
+.program-grid {
   display: grid;
   gap: 1rem;
 }
@@ -162,12 +163,45 @@ p {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.program-grid {
+  margin-top: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
 .feature-grid article,
+.program-card,
 .stat-card {
   padding: 1.15rem;
   border-radius: var(--radius-sm);
   background: var(--surface-strong);
   border: 1px solid var(--line);
+}
+
+.program-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.program-day {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.program-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.program-time {
+  min-width: 3.6rem;
+  color: var(--sage);
+  font-weight: 700;
 }
 
 .label {
@@ -381,6 +415,7 @@ th {
   .page-home .layout,
   .rsvp-form,
   .feature-grid,
+  .program-grid,
   .stats-grid {
     grid-template-columns: 1fr;
   }
