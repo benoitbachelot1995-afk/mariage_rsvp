@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Suivi RSVP</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body class="page page-dashboard">
+    <div class="backdrop"></div>
+    <main class="layout">
+      <section class="card dashboard-header">
+        <div>
+          <p class="eyebrow">Tableau de bord</p>
+          <h1>Suivi des confirmations</h1>
+          <p>Cette page centralise les réponses collectées dans la base de données locale.</p>
+        </div>
+        <a class="button button-secondary" href="/">Retour au formulaire</a>
+      </section>
+
+      <section class="stats-grid">
+        <article class="card stat-card">
+          <span class="label">Réponses reçues</span>
+          <strong id="total-responses">0</strong>
+        </article>
+        <article class="card stat-card">
+          <span class="label">Foyers confirmés</span>
+          <strong id="confirmed-households">0</strong>
+        </article>
+        <article class="card stat-card">
+          <span class="label">Invités confirmés</span>
+          <strong id="confirmed-guests">0</strong>
+        </article>
+        <article class="card stat-card">
+          <span class="label">En attente</span>
+          <strong id="tentative-households">0</strong>
+        </article>
+      </section>
+
+      <section class="card table-card">
+        <div class="table-header">
+          <div>
+            <p class="eyebrow">Réponses</p>
+            <h2>Dernières confirmations</h2>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Réponse</th>
+                <th>Personnes</th>
+                <th>Contact</th>
+                <th>Infos utiles</th>
+                <th>Mis à jour</th>
+              </tr>
+            </thead>
+            <tbody id="responses-table">
+              <tr>
+                <td colspan="6">Aucune réponse pour le moment.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/static/dashboard.js" defer></script>
+  </body>
+</html>

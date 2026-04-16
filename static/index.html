@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RSVP Mariage</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body class="page page-home">
+    <div class="backdrop"></div>
+    <main class="layout">
+      <section class="hero card">
+        <p class="eyebrow">Invitation</p>
+        <h1 id="couple-names">Hortense & Benoit</h1>
+        <p id="hero-message" class="lead">
+          Nous serions ravis de célébrer cette journée avec vous.
+        </p>
+
+        <div class="hero-grid">
+          <div>
+            <span class="label">Date</span>
+            <strong id="wedding-date">28 août 2027</strong>
+          </div>
+          <div>
+            <span class="label">Heure</span>
+            <strong id="ceremony-time">16h00</strong>
+          </div>
+          <div>
+            <span class="label">Lieu</span>
+            <strong id="venue">Tarascon</strong>
+          </div>
+          <div>
+            <span class="label">Réponse avant le</span>
+            <strong id="response-deadline">31 mai 2026</strong>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a class="button button-secondary" href="#rsvp-form">Répondre maintenant</a>
+          <a class="button button-ghost" href="/dashboard">Voir le suivi</a>
+        </div>
+      </section>
+
+      <section class="details card">
+        <div>
+          <p class="eyebrow">Le jour J</p>
+          <h2>Une V0 déjà prête à vivre</h2>
+        </div>
+        <p>
+          Cette première version permet de centraliser les réponses, compter les accompagnants,
+          noter les régimes alimentaires et garder un petit message de vos invités.
+        </p>
+        <div class="feature-grid">
+          <article>
+            <h3>Centralisation</h3>
+            <p>Toutes les réponses sont enregistrées dans une base SQLite locale.</p>
+          </article>
+          <article>
+            <h3>Suivi rapide</h3>
+            <p>Un tableau de bord résume les confirmations et affiche les réponses reçues.</p>
+          </article>
+          <article>
+            <h3>Base évolutive</h3>
+            <p>On pourra ensuite brancher une vraie admin, des codes d’invitation ou un emailing.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="form-shell card">
+        <div class="form-header">
+          <p class="eyebrow">RSVP</p>
+          <h2>Confirmez votre présence</h2>
+          <p>Un seul formulaire par foyer suffit pour cette V0.</p>
+        </div>
+
+        <form id="rsvp-form" class="rsvp-form">
+          <label>
+            Nom complet
+            <input type="text" name="full_name" placeholder="Ex. Marie Dupont" required />
+          </label>
+
+          <label>
+            E-mail
+            <input type="email" name="email" placeholder="marie@email.com" required />
+          </label>
+
+          <label>
+            Téléphone
+            <input type="tel" name="phone" placeholder="06 12 34 56 78" />
+          </label>
+
+          <fieldset class="attendance-group">
+            <legend>Votre réponse</legend>
+            <label class="choice">
+              <input type="radio" name="attendance" value="yes" checked />
+              <span>Je serai présent(e)</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="attendance" value="maybe" />
+              <span>Je ne suis pas encore certain(e)</span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="attendance" value="no" />
+              <span>Je ne pourrai pas être présent(e)</span>
+            </label>
+          </fieldset>
+
+          <label>
+            Nombre de personnes dans votre groupe
+            <input type="number" name="guest_count" min="0" max="10" value="1" />
+          </label>
+
+          <label>
+            Régime alimentaire ou allergies
+            <textarea
+              name="dietary_requirements"
+              rows="3"
+              placeholder="Végétarien, sans gluten, allergie aux fruits à coque..."
+            ></textarea>
+          </label>
+
+          <label>
+            Une chanson à proposer ?
+            <input type="text" name="song_request" placeholder="Ex. September - Earth, Wind & Fire" />
+          </label>
+
+          <label>
+            Un mot pour les mariés
+            <textarea
+              name="message"
+              rows="4"
+              placeholder="Votre petit mot, une précision logistique, une idée..."
+            ></textarea>
+          </label>
+
+          <div class="form-actions">
+            <button class="button button-primary" type="submit">Envoyer ma réponse</button>
+            <p id="form-feedback" class="form-feedback" aria-live="polite"></p>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
