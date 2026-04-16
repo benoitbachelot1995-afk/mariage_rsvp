@@ -64,10 +64,17 @@ async function handleSubmit(event) {
 
     feedback.textContent = result.message;
     feedback.dataset.state = "success";
+
+    const redirectParams = new URLSearchParams({
+      name: payload.full_name,
+      attendance: payload.attendance,
+    });
+
     form.reset();
     form.querySelector('input[value="yes"]').checked = true;
     form.querySelector('input[name="guest_count"]').value = 1;
     updateGuestCountState(form);
+    window.location.href = `/merci?${redirectParams.toString()}`;
   } catch (error) {
     feedback.textContent = error.message;
     feedback.dataset.state = "error";

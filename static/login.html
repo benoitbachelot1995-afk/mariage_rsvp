@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connexion Admin RSVP</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body class="page page-auth">
+    <div class="backdrop"></div>
+    <main class="layout auth-layout">
+      <section class="card auth-card">
+        <p class="eyebrow">Administration</p>
+        <h1>Accès privé</h1>
+        <p class="lead auth-lead">
+          Le suivi des RSVP est réservé aux organisateurs. Entrez votre mot de passe admin pour continuer.
+        </p>
+
+        <form class="auth-form" method="post" action="/admin/login">
+          <label>
+            Mot de passe
+            <input type="password" name="password" placeholder="Votre mot de passe admin" required />
+          </label>
+          <button class="button button-primary" type="submit">Se connecter</button>
+        </form>
+
+        <p class="auth-help">
+          En cas d’erreur, vérifiez le mot de passe enregistré dans <code>data/admin_password.txt</code>.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

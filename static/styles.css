@@ -218,7 +218,8 @@ p {
 
 .hero-actions,
 .form-actions,
-.table-header {
+.table-header,
+.dashboard-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -271,6 +272,104 @@ p {
 .form-header {
   max-width: 44rem;
   margin-bottom: 1.5rem;
+}
+
+.page-auth .layout {
+  display: block;
+}
+
+.auth-layout {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.auth-card {
+  width: min(100%, 34rem);
+  padding: 2rem;
+}
+
+.auth-lead {
+  margin-bottom: 1.5rem;
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-weight: 700;
+}
+
+.auth-help {
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.page-thank-you .layout {
+  display: block;
+}
+
+.thank-you-layout {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.thank-you-card {
+  width: min(100%, 52rem);
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.thank-you-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -5rem -5rem auto;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(180, 95, 68, 0.16), transparent 68%);
+  pointer-events: none;
+}
+
+.thank-you-lead {
+  max-width: 38rem;
+}
+
+.thank-you-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+.thank-you-panel {
+  padding: 1.15rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+}
+
+.thank-you-panel strong {
+  display: block;
+  font-size: 1.1rem;
+  font-family: "Georgia", "Times New Roman", serif;
+}
+
+.thank-you-note {
+  margin-top: 1.5rem;
+  padding: 1.2rem 1.3rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(180, 95, 68, 0.16);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.52), rgba(255, 250, 245, 0.9));
+  max-width: 42rem;
 }
 
 .rsvp-form {
@@ -351,6 +450,15 @@ p {
   gap: 1.5rem;
 }
 
+.dashboard-actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.dashboard-actions form {
+  margin: 0;
+}
+
 .stats-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -415,6 +523,7 @@ th {
   .page-home .layout,
   .rsvp-form,
   .feature-grid,
+  .thank-you-grid,
   .program-grid,
   .stats-grid {
     grid-template-columns: 1fr;
@@ -434,6 +543,7 @@ th {
   .hero,
   .details,
   .form-shell,
+  .thank-you-card,
   .dashboard-header,
   .table-card {
     padding: 1.35rem;
@@ -442,7 +552,8 @@ th {
 
   .hero-actions,
   .form-actions,
-  .table-header {
+  .table-header,
+  .dashboard-actions {
     flex-direction: column;
     align-items: flex-start;
   }
